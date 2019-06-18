@@ -5,6 +5,7 @@ const router = express.Router();
 const bcrypt = require(`bcryptjs`);
 const jwt = require(`jsonwebtoken`);
 const keys = require(`../../../config/keys`);
+var passport = require(`passport`);
 
 // Load input validation
 const validateRegisterInput = require(`../../validation/register`);
@@ -13,26 +14,25 @@ const validateLoginInput = require(`../../validation/login`);
 const User = require(`../../models/User`);
 const { addErrorMessages, createErrorObject } = require(`../../utils/errorHandler`);
 
-// router.get(`/`, passport.authenticate(`jwt`), (req, res, next) => {
-// 	const errorObject = createErrorObject();
+router.get(`/`, passport.authenticate(`jwt`, { session: false }), (req, res, next) => {
+	const errorObject = createErrorObject();
 
-// 	const id = req.body.id;
-// 	User.findOne({ id }).then(user => {
-// 		if (!user) {
-// 			addErrorMessages(errorObject, `User with id \${id} not found`);
-// 			return res.status(404).json(errorObject);
-// 		} else {
-// 			return
-// 		}
-// 	});
-// });
+	const id = req.body.id;
+	User.findOne({ id }).then(user => {
+		if (!user) {
+			addErrorMessages(errorObject, `User with id \${id} not found`);
+			return res.status(404).json(errorObject);
+		} else {
+			return res.status(200).json(user);
+		}
+	});
+});
 
 // @route POST api/users/register
 // @desc Register user
 // @access Public
 router.post(`/register`, (req, res, next) => {
 	try {
-		console.log(`Hit Register`);
 		let errorObject = createErrorObject();
 		// Form validation
 		const isValid = validateRegisterInput(req.body, errorObject);
@@ -123,7 +123,7 @@ router.post(`/login`, (req, res) => {
 	});
 });
 
-// router.post(`/user/avatar`, passport.authenticate(`jwt`), (req, res) => {
+// router.post(`/user/avatar`, passport.authenticate(`jwt`, ), (req, res) => {
 // 	let errorObject = createErrorObject();
 // 	const query = { email: req.user.email };
 // 	User.findOneAndUpdate(
