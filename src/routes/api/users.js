@@ -44,15 +44,10 @@ router.post(`/image`, passport.authenticate(`jwt`, { session: false }), (req, re
 		return res.status(400).json(errorObject);
 	}
 
-	const email = req.body.email;
-	User.findOneAndUpdate({ email }, { imageUrl: req.body.imageUrl, lastModifiedDate: Date.now() }, { upsert: false, useFindAndModify: false }, (err, user) => {
+	const id = req.body.id;
+	User.findOneAndUpdate({ id }, { imageUrl: req.body.imageUrl, lastModifiedDate: Date.now() }, { upsert: false, useFindAndModify: true }, (err, user) => {
 		if (err) {
 			return res.send(500, { error: err });
-		}
-
-		if (!user) {
-			addErrorMessages(errorObject, `User ${email} not found`);
-			return res.send(400, errorObject);
 		}
 
 		return res.status(200).json(user);
