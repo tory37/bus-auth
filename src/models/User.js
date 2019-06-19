@@ -6,6 +6,15 @@ const Schema = mongoose.Schema;
 
 // Create Schema
 const UserSchema = new Schema({
+	userName: {
+		type: String,
+		required: true
+	},
+	roles: {
+		type: [String],
+		enum: [`ADMIN`, `CIVILIAN`],
+		default: [`CIVILIAN`]
+	},
 	email: {
 		type: String,
 		required: true
@@ -14,14 +23,18 @@ const UserSchema = new Schema({
 		type: String,
 		required: true
 	},
-	date: {
-		type: Date,
-		default: Date.now
-	},
 	imageUrl: {
 		type: mongoose.SchemaTypes.Url,
 		default: `https://cdn.pixabay.com/photo/2014/04/02/10/25/man-303792_960_720.png`,
 		required: true
+	},
+	createdDate: {
+		type: Date,
+		default: Date.now
+	},
+	lastModifiedDate: {
+		type: Date,
+		default: Date.now
 	}
 });
 

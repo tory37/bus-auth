@@ -23,8 +23,39 @@ router.get(`/`, passport.authenticate(`jwt`, { session: false }), (req, res, nex
 			addErrorMessages(errorObject, `User with id \${id} not found`);
 			return res.status(404).json(errorObject);
 		} else {
-			return res.status(200).json(user);
+			return res.status(200).json({
+				userName: user.userName,
+				email: user.email,
+				imageUrl: user.imageUrl,
+				lastModifiedDate: user.lastModifiedDate,
+				roles: user.roles,
+				createdDate: user.createdDate
+			});
 		}
+	});
+});
+
+router.post(`/image`, passport.authenticate(`jwt`, { session: false }), (req, res, next) => {
+	const errorObject = createErrorObject();
+	console.log(req.body);
+
+	if (!req.body.imageUrl) {
+		addErrorMessages(errorObject, `Parameter 'imageUrl' is required when updating a user's imageUrl`);
+		return res.status(400).json(errorObject);
+	}
+
+	const email = req.body.email;
+	User.findOneAndUpdate({ email }, { imageUrl: req.body.imageUrl, lastModifiedDate: Date.now() }, { upsert: false, useFindAndModify: false }, (err, user) => {
+		if (err) {
+			return res.send(500, { error: err });
+		}
+
+		if (!user) {
+			addErrorMessages(errorObject, `User ${email} not found`);
+			return res.send(400, errorObject);
+		}
+
+		return res.status(200).json(user);
 	});
 });
 
@@ -48,7 +79,8 @@ router.post(`/register`, (req, res, next) => {
 				const newUser = new User({
 					name: req.body.name,
 					email: req.body.email,
-					password: req.body.password
+					password: req.body.password,
+					userName: req.body.userName
 				});
 				// Hash password before saving in database
 				bcrypt.genSalt(10, (err, salt) => {
@@ -109,7 +141,7 @@ router.post(`/login`, (req, res) => {
 							token: `Bearer ` + token,
 							user: {
 								id: user.id,
-								name: user.name,
+								userName: user.userName,
 								email: user.email,
 								imageUrl: user.imageUrl
 							}
